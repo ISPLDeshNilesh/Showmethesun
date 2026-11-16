@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>showmethesun.com</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f4;--fg:#15171a;--mut:#5b6470;--line:#c9d0d8;--acc:#e8743b;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d0e11;--fg:#f1eee8;--mut:#9aa1ad;--line:#2a2e36;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0d0e11;--fg:#f1eee8;--mut:#9aa1ad;--line:#2a2e36;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.4}
+main{max-width:920px;margin:0 auto;padding:20px 16px 32px}
+.brand{font-weight:700;font-size:1rem;color:var(--mut);margin:0 0 14px;letter-spacing:.01em}
+.read{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 22px;margin-bottom:14px}
+.time{font-size:clamp(2.6rem,9vw,4.4rem);font-weight:700;line-height:1;letter-spacing:-.03em}
+.phase{font-size:clamp(1.2rem,3.6vw,1.7rem);font-weight:700;color:var(--acc)}
+.sub{color:var(--mut);margin:4px 0 0;font-size:1rem}
+svg{display:block;width:100%;height:auto;border-radius:10px}
+.ctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:16px}
+label{display:flex;flex-direction:column;gap:5px;font-size:.88rem;color:var(--mut)}
+select,input,button{font:inherit;color:var(--fg);background:transparent;border:1px solid var(--line);border-radius:8px;padding:9px 10px;min-height:42px}
+input[type=range]{padding:0;accent-color:var(--acc)}
+button{cursor:pointer}
+button:hover{border-color:var(--acc)}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.live{border-color:var(--acc);color:var(--acc)}
+#msg{color:var(--mut);font-size:.88rem;margin-top:8px;min-height:1.2em}
+</style>
+</head>
+<body>
+<main>
+<p class="brand">showmethesun.com</p>
+<div class="read">
+  <div class="time" id="time">--:--</div>
+  <div class="phase" id="phase"></div>
+</div>
+<p class="sub" id="date"></p>
+<p class="sub" id="where" style="margin-bottom:14px"></p>
+
+<svg id="scene" viewBox="0 0 800 480" role="img" aria-label="A figure standing under the sky, with the sun where it is right now">
+  <defs>
+    <linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop id="sT" offset="0"/><stop id="sB" offset="1"/></linearGradient>
+    <g id="fig" fill="currentColor" stroke="currentColor"></g>
+  </defs>
+  <rect width="800" height="400" fill="url(#sk)"/>
+  <g id="sun">
+    <circle id="s3" r="95" opacity=".12"/>
+    <circle id="s2" r="58" opacity=".25"/>
+    <circle id="s1" r="26"/>
+  </g>
+  <path id="lm" transform="translate(590 380)" fill="none" stroke-width="4" stroke-opacity=".7" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect id="ground" y="380" width="800" height="100"/>
+  <text id="ln" x="590" y="414" fill="#fff" fill-opacity=".8" font-size="13" font-family="inherit" text-anchor="middle"></text>
+  <line x1="0" x2="800" y1="380" y2="380" stroke="#fff" stroke-opacity=".18"/>
+  <text id="lL" x="14" y="402" fill="#fff" fill-opacity=".8" font-size="15" font-family="inherit">East</text>
+  <text id="lR" x="786" y="402" fill="#fff" fill-opacity=".8" font-size="15" font-family="inherit" text-anchor="end">West</text>
+  <use id="shadow" href="#fig" x="0" y="0" color="#000"/>
+  <use id="body" href="#fig" x="400" y="440"/>
+  <g id="cmp" transform="translate(72 72)" font-family="inherit" font-size="14" font-weight="700" text-anchor="middle" dominant-baseline="central">
+    <circle r="60" fill="#000" fill-opacity=".4"/>
+    <circle r="30" fill="none" stroke="#fff" stroke-opacity=".35" stroke-dasharray="3 3"/>
+    <line id="cl" x1="0" y1="0" x2="0" y2="0" stroke="#fff" stroke-opacity=".5"/>
+    <circle r="3" fill="#fff"/>
+    <circle id="cd" r="7"/>
+    <text id="cU" y="-45" fill="#fff"></text><text id="cD" y="45" fill="#fff"></text>
+    <text id="cL" x="-45" fill="#fff"></text><text id="cR" x="45" fill="#fff"></text>
+    <text id="cf" y="78" font-size="12" font-weight="400" fill="#fff" fill-opacity=".85"></text>
+  </g>
+</svg>
+
+<div class="ctl">
+  <label>City<select id="city"></select></label>
+  <label>Date<input type="date" id="dt"></label>
+  <label>Time of day<input type="range" id="tm" min="0" max="1439" step="5"></label>
+</div>
+<div class="row">
+  <button id="now" class="live">Live now</button>
+  <button id="gen">Switch figure</button>
+  <button id="loc">Use my location</button>
+</div>
+<div id="msg"></div>
+</main>
+
+<script>
+const R=Math.PI/180,cl=(v,a,b)=>Math.min(b,Math.max(a,v));
+const CITIES="Pune, India|18.52|73.86|Asia/Kolkata;Mumbai, India|19.08|72.88|Asia/Kolkata;Delhi, India|28.61|77.21|Asia/Kolkata;Bengaluru, India|12.97|77.59|Asia/Kolkata;Chennai, India|13.08|80.27|Asia/Kolkata;Kolkata, India|22.57|88.36|Asia/Kolkata;Hyderabad, India|17.39|78.49|Asia/Kolkata;Kochi, India|9.93|76.27|Asia/Kolkata;Dubai, UAE|25.2|55.27|Asia/Dubai;Singapore|1.35|103.82|Asia/Singapore;Bangkok, Thailand|13.76|100.5|Asia/Bangkok;Hong Kong|22.32|114.17|Asia/Hong_Kong;Beijing, China|39.9|116.4|Asia/Shanghai;Tokyo, Japan|35.68|139.69|Asia/Tokyo;Seoul, South Korea|37.57|126.98|Asia/Seoul;Sydney, Australia|-33.87|151.21|Australia/Sydney;Perth, Australia|-31.95|115.86|Australia/Perth;Auckland, New Zealand|-36.85|174.76|Pacific/Auckland;Moscow, Russia|55.76|37.62|Europe/Moscow;Istanbul, Turkey|41.01|28.98|Europe/Istanbul;Cairo, Egypt|30.04|31.24|Africa/Cairo;Nairobi, Kenya|-1.29|36.82|Africa/Nairobi;Lagos, Nigeria|6.52|3.38|Africa/Lagos;Johannesburg, South Africa|-26.2|28.05|Africa/Johannesburg;London, UK|51.51|-0.13|Europe/London;Dublin, Ireland|53.35|-6.26|Europe/Dublin;Paris, France|48.86|2.35|Europe/Paris;Berlin, Germany|52.52|13.4|Europe/Berlin;Madrid, Spain|40.42|-3.7|Europe/Madrid;Rome, Italy|41.9|12.5|Europe/Rome;Reykjavik, Iceland|64.15|-21.94|Atlantic/Reykjavik;Tromsø, Norway|69.65|18.96|Europe/Oslo;New York, USA|40.71|-74.01|America/New_York;Chicago, USA|41.88|-87.63|America/Chicago;Denver, USA|39.74|-104.99|America/Denver;Los Angeles, USA|34.05|-118.24|America/Los_Angeles;Anchorage, USA|61.22|-149.9|America/Anchorage;Honolulu, USA|21.31|-157.86|Pacific/Honolulu;Toronto, Canada|43.65|-79.38|America/Toronto;Mexico City, Mexico|19.43|-99.13|America/Mexico_City;São Paulo, Brazil|-23.55|-46.63|America/Sao_Paulo;Buenos Aires, Argentina|-34.6|-58.38|America/Argentina/Buenos_Aires;Quito, Ecuador|-0.18|-78.47|America/Guayaquil".split(";").map(s=>{const a=s.split("|");return{n:a[0],lat:+a[1],lng:+a[2],tz:a[3]}});
+
+const $=id=>document.getElementById(id);
+const FIG={
+ m:'<circle cx="0" cy="-182" r="14" stroke="none"/><path d="M-24-166Q0-173 24-166L20-96H-20Z" stroke="none"/><path d="M-27-160L-35-100M27-160L35-100" fill="none" stroke-width="10" stroke-linecap="round"/><path d="M-9-98L-10-6M9-98L10-6" fill="none" stroke-width="14" stroke-linecap="round"/>',
+ f:'<path d="M-15-188Q-24-150-17-132L17-132Q24-150 15-188Z" stroke="none"/><circle cx="0" cy="-182" r="14" stroke="none"/><path d="M-17-166Q0-172 17-166L15-122L36-52H-36L-15-122Z" stroke="none"/><path d="M-21-160L-30-105M21-160L30-105" fill="none" stroke-width="8" stroke-linecap="round"/><path d="M-8-52L-9-6M8-52L9-6" fill="none" stroke-width="10" stroke-linecap="round"/>'
+};
+let gender="m",state={ci:0,live:true,date:"",min:0};
+const tzNow=Intl.DateTimeFormat().resolvedOptions().timeZone;
+const guess=CITIES.findIndex(c=>c.tz===tzNow);state.ci=guess<0?0:guess;
+
+function parts(ms,tz){
+ const o={};new Intl.DateTimeFormat("en-US",{timeZone:tz,hourCycle:"h23",year:"numeric",month:"numeric",day:"numeric",hour:"numeric",minute:"numeric"}).formatToParts(ms).forEach(p=>o[p.type]=+p.value);
+ return{y:o.year,m:o.month,d:o.day,h:o.hour,mi:o.minute};
+}
+function offMin(ms,tz){const p=parts(ms,tz);return(Date.UTC(p.y,p.m-1,p.d,p.h,p.mi)-Math.floor(ms/6e4)*6e4)/6e4}
+function toUtc(y,m,d,min,tz){const g=Date.UTC(y,m-1,d,0,min);const t=g-offMin(g,tz)*6e4;return g-offMin(t,tz)*6e4}
+
+function sunPos(ms,lat,lng){
+ const d=ms/864e5-0.5+2440588-2451545,M=R*(357.5291+0.98560028*d),
+ C=R*(1.9148*Math.sin(M)+0.02*Math.sin(2*M)+0.0003*Math.sin(3*M)),
+ L=M+C+R*102.9372+Math.PI,e=R*23.4397,
+ dec=Math.asin(Math.sin(L)*Math.sin(e)),ra=Math.atan2(Math.sin(L)*Math.cos(e),Math.cos(L)),
+ H0=R*(280.16+360.9856235*d)-(-lng*R)-ra,phi=lat*R,
+ alt=Math.asin(Math.sin(phi)*Math.sin(dec)+Math.cos(phi)*Math.cos(dec)*Math.cos(H0)),
+ az=Math.atan2(Math.sin(H0),Math.cos(H0)*Math.sin(phi)-Math.tan(dec)*Math.cos(phi)),
+ H=Math.atan2(Math.sin(H0),Math.cos(H0));
+ return{alt:alt/R,az,morn:H<0};
+}
+
+const LM=["Shaniwar Wada gate|M-80 0V-60H-60V-70H-40V-60H-25V-100H25V-60H40V-70H60V-60H80V0M-18 0V-40A18 18 0 0 1 18-40V0",
+"Gateway of India|M-70 0V-70H-55V-80H-45V-70H-30V-90H30V-70H45V-80H55V-70H70V0M-30 0V-70M30 0V-70M-18 0V-55A18 18 0 0 1 18-55V0M-30-90L-20-102H20L30-90",
+"India Gate|M-45 0V-95H45V0M-52-95H52V-105H-52ZM-22 0V-55A22 22 0 0 1 22-55V0",
+"Vidhana Soudha|M-100 0V-45H100V0M-100-45H-55V-60H55V-45M-40-60V-85H40V-60M-20-85Q0-125 20-85M-30-60V0M0-60V0M30-60V0",
+"Kapaleeshwarar gopuram|M-45 0V-15H45V0M-40-15L-32-45H32L40-15M-30-45L-24-70H24L30-45M-22-70L-16-95H16L22-70M-14-95L-10-115H10L14-95M-6-115L0-130L6-115",
+"Howrah Bridge|M-100 0V-10H100V0M-70-10V-90M70-10V-90M-70-90L-35-105L0-75L35-105L70-90M-70-90L-100-10M70-90L100-10M-35-105V-10M35-105V-10",
+"Charminar|M-50 0V-75H50V0M-50-75V-115M-42-75V-115M42-75V-115M50-75V-115M-50-115Q-46-130-42-115M42-115Q46-130 50-115M-14 0V-40A14 14 0 0 1 14-40V0M-35-75V-88H35V-75",
+"Chinese fishing nets|M-20 0V-90M-90-30L-20-90L60-70M-20-90L50-100M60-70L90-20H30L60-70M30-20L60-70",
+"Burj Khalifa|M-18 0L-12-60L-8-95L-4-130L0-160L4-130L8-95L12-60L18 0M-12-60H12M-8-95H8",
+"Marina Bay Sands|M-60 0V-110H-35V0M-12 0V-110H12V0M35 0V-110H60V0M-75-118H75L70-110H-70Z",
+"Wat Arun|M-30 0L-24-60L-14-100L0-135L14-100L24-60L30 0M-14-100H14M-24-60H24M-70 0L-62-35L-54 0M54 0L62-35L70 0",
+"Victoria Harbour skyline|M-100 0V-50H-80V-80H-65V-30H-45V-100L-40-120L-35-100V-30H-10V-70H10V-40H30V-90H50V-20H70V-60H90V0",
+"Temple of Heaven|M-45 0H45M-30 0V-30M30 0V-30M-45-30Q0-40 45-30M-32-30V-55M32-30V-55M-38-55Q0-65 38-55M-24-55V-80M24-55V-80M-30-80Q0-90 30-80M-4-90L0-115L4-90",
+"Tokyo Tower|M-40 0L-6-120M40 0L6-120M-6-120L0-155L6-120H-6M-31-25H31M-21-55H21M-13-85H13M-31-25L21-55M31-25L-21-55",
+"N Seoul Tower|M-12 0L-3-86M12 0L3-86M-14-100a14 14 0 1 0 28 0a14 14 0 1 0-28 0M0-114V-150",
+"Sydney Opera House|M-90 0V-10H90V0M-80-10Q-75-80-30-85Q-40-40-30-10M-20-10Q-15-100 30-110Q20-50 25-10M35-10Q40-70 75-70Q70-30 72-10",
+"Bell Tower|M-24 0H24M-12 0L-12-45L0-130L12-45L12 0M-12-45H12",
+"Sky Tower|M-6 0L-3-100M6 0L3-100M-16-100H16V-114H-16ZM-3-114L0-165L3-114",
+"St Basil’s Cathedral|M-70 0V-50H70V0M-55-50V-70Q-65-90-45-105Q-25-90-35-70V-50M-10-50V-85Q-20-115 0-135Q20-115 10-85V-50M35-50V-70Q25-90 45-105Q65-90 55-70V-50",
+"Hagia Sophia|M-60 0V-45H60V0M-35-45Q0-110 35-45M-85 0V-100M-91-100H-79M-88-100L-85-115L-82-100M85 0V-100M79-100H91M82-100L85-115L88-100",
+"Pyramids of Giza|M-90 0L-25-100L40 0M5 0L50-65L95 0M-25-100L-5 0",
+"KICC tower|M-18 0V-115M18 0V-115M-28-125H28L18-115H-18ZM0-125V-150",
+"Lekki–Ikoyi Bridge|M-100-10H100M-30 0V-120M30 0V-120M-30-120L-95-12M-30-120L-65-12M-30-120L-45-12M-30-120L-15-12M30-120L95-12M30-120L65-12M30-120L45-12M30-120L15-12",
+"Nelson Mandela Bridge|M-100-8H100M0 0V-125M0-125L-80-10M0-125L-55-10M0-125L-30-10M0-125L80-10M0-125L55-10M0-125L30-10",
+"Big Ben|M-18 0V-100H18V0M-22-100H22M-14-100V-130H14V-100M-14-130L0-160L14-130M-8-115a8 8 0 1 0 16 0a8 8 0 1 0-16 0",
+"Spire of Dublin|M-12 0H12M-8 0L0-165L8 0",
+"Eiffel Tower|M-45 0L-8-110L0-165L8-110L45 0M-27-45H27M-17-85H17M-45 0Q0-70 45 0M-27-45L17-85M27-45L-17-85",
+"Brandenburg Gate|M-80 0V-75H80V0M-80-75V-90H80V-75M-60 0V-75M-30 0V-75M0 0V-75M30 0V-75M60 0V-75M-25-90V-105H25V-90M-12-105L-6-120H6L12-105",
+"Puerta de Alcalá|M-70 0V-65H70V0M-70-65V-75H70V-65M-14 0V-40A14 14 0 0 1 14-40V0M-50 0V-30A10 10 0 0 1-30-30V0M30 0V-30A10 10 0 0 1 50-30V0M-30-75V-90H30V-75M-12-90V-100H12V-90",
+"Colosseum|M-90 0V-60Q-90-70-80-72H80Q90-70 90-60V0M-90-30H90M-90-60H90M-78 0V-18A8 8 0 0 1-62-18V0M-40 0V-18A8 8 0 0 1-24-18V0M-8 0V-18A8 8 0 0 1 8-18V0M24 0V-18A8 8 0 0 1 40-18V0M62 0V-18A8 8 0 0 1 78-18V0",
+"Hallgrímskirkja|M-20 0V-120L-10-135L0-150L10-135L20-120V0M-65 0V-40L-50-55L-35-40V0M35 0V-40L50-55L65-40V0M-35-40H35",
+"Arctic Cathedral|M-80 0L-55-100L-30 0M-30 0L-5-85L20 0M20 0L45-70L70 0M-55-100L-5-85L45-70",
+"Statue of Liberty|M-28 0V-30H28V0M-18-30L-10-95H10L18-30M10-90L26-115V-135M21-135H31M-9-97a9 9 0 1 1 18 0M-12-110L-18-118M0-112V-122M12-110L18-118",
+"Willis Tower|M-36 0V-70H-18V-100H-6V-140H6V-100H18V-70H36V0M-4-140V-165M4-140V-160",
+"Rocky Mountains|M-100 0L-60-60L-40-40L0-110L30-60L50-80L100 0",
+"Hollywood Sign|M-76 0V-45M-64 0V-45M-76-22H-64M-59 0V-45H-47V0ZM-42-45V0H-30M-25-45V0H-13M-8-45L-2-22L4-45M-2-22V0M9-45L12 0L15-22L18 0L21-45M26 0V-45H38V0ZM43 0V-45H55V0ZM60 0V-45H67L72-35V-10L67 0Z",
+"Chugach Mountains|M-100 0L-70-50L-50-35L-10-120L10-95L25-110L60-50L80-60L100 0",
+"Diamond Head|M-100 0L-60-20L-20-70L10-85L40-60L60-40L100 0M70 0Q75-40 65-65M65-65L45-60M65-65L85-58M65-65L50-78M65-65L80-75",
+"CN Tower|M-6 0L-3-100M6 0L3-100M-16-100H16V-112H-16ZM-3-112L0-170L3-112",
+"Angel of Independence|M-18 0V-20H18V0M-12-20V-30H12V-20M-6-30V-110H6V-30M0-115V-135M0-125L-20-145M0-125L20-145",
+"Octávio Frias Bridge|M-100-10H100M-30 0L10-130M30 0L-10-130M0-100L-90-10M0-100L-60-10M0-100L90-10M0-100L60-10",
+"Obelisco|M-10 0L-8-130L0-150L8-130L10 0M-8-130H8",
+"Basílica del Voto Nacional|M-50 0V-70L-40-120L-30-70V0M30 0V-70L40-120L50-70V0M-30-70H30M-12 0V-30A12 12 0 0 1 12-30V0"];
+const hx=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+const mix=(a,b,t)=>{a=hx(a);b=hx(b);return"#"+a.map((v,i)=>Math.round(v+(b[i]-v)*t).toString(16).padStart(2,"0")).join("")};
+const K=[[-8,"#000000","#000000"],[-3,"#06091a","#190f22"],[0,"#1b2a5a","#e8743b"],[6,"#3b6fb5","#f4a35a"],[20,"#4a8fd8","#a5cdee"],[60,"#2f7fd6","#8ec5f2"]];
+function sky(alt){
+ const a=cl(alt,-8,60);let i=0;while(i<K.length-2&&a>K[i+1][0])i++;
+ const t=(a-K[i][0])/(K[i+1][0]-K[i][0]);
+ return[mix(K[i][1],K[i+1][1],t),mix(K[i][2],K[i+1][2],t)];
+}
+function phase(alt,m){
+ if(alt<-6)return["Night","The sun is below the horizon."];
+ if(alt<0)return m?["Dawn","The sun is about to rise."]:["Dusk","The sun has just set."];
+ if(alt<8)return m?["Sunrise","The sun is rising, low on the horizon."]:["Sunset","The sun is setting, low on the horizon."];
+ if(alt<30)return m?["Morning","The sun is climbing."]:["Late afternoon","The sun is sinking."];
+ if(alt<65)return m?["Mid-morning","The sun is high and still climbing."]:["Afternoon","The sun is high and slowly descending."];
+ return["Around noon","The sun is almost directly overhead."];
+}
+const DIR=["north","north-east","east","south-east","south","south-west","west","north-west"];
+
+function update(){
+ const c=CITIES[state.ci];let ms;
+ if(state.live){ms=Date.now();const p=parts(ms,c.tz);state.date=p.y+"-"+String(p.m).padStart(2,"0")+"-"+String(p.d).padStart(2,"0");state.min=p.h*60+p.mi}
+ const [y,m,d]=state.date.split("-").map(Number);
+ if(!state.live)ms=toUtc(y,m,d,state.min,c.tz);
+ $("dt").value=state.date;$("tm").value=state.min;
+ $("now").style.opacity=state.live?1:.6;
+
+ const hh=Math.floor(state.min/60),mm=state.min%60;
+ $("time").textContent=(hh%12||12)+":"+String(mm).padStart(2,"0")+" "+(hh<12?"am":"pm");
+ $("date").textContent=new Date(Date.UTC(y,m-1,d)).toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric",timeZone:"UTC"});
+ $("where").textContent=c.n+(state.live?" · live":"");
+
+ const s=sunPos(ms,c.lat,c.lng),alt=s.alt,ph=phase(alt,s.morn);
+ $("phase").textContent=ph[0];
+ let bearing=((s.az/R+180)%360+360)%360;
+ $("where").textContent+=" · "+(alt>0?Math.round(alt)+"° above the horizon, toward the "+DIR[Math.round(bearing/45)%8]:Math.round(-alt)+"° below the horizon");
+ $("msg").textContent=ph[1];
+
+ const [top,bot]=sky(alt);$("sT").setAttribute("stop-color",top);$("sB").setAttribute("stop-color",bot);
+ const day=cl((alt+4)/10,0,1);
+ $("ground").setAttribute("fill",mix("#050505","#4b6a3f",day));
+ $("body").style.color=mix("#9aa0ad","#1d1a17",cl((alt+6)/6,0,1));
+ const lp=(LM[state.ci]||"|").split("|");
+ $("lm").setAttribute("d",lp[1]);$("ln").textContent=lp[0];
+ $("lm").setAttribute("stroke",mix("#9aa0ad","#2b2d31",cl((alt+6)/6,0,1)));
+
+ const fc=c.lat>=0?1:-1,sx=400+fc*Math.sin(s.az)*Math.cos(alt*R)*340,sy=380-Math.sin(alt*R)*300;
+ const sc=mix("#ff6a1f","#fff4b8",cl((alt-2)/40,0,1));
+ $("sun").setAttribute("transform","translate("+sx+" "+sy+")");
+ $("sun").style.display=alt>-1?"":"none";
+ ["s1","s2","s3"].forEach(i=>$(i).setAttribute("fill",sc));
+
+ // compass: top is the way you face, so left/right match the scene
+ const rt=fc*Math.sin(s.az),fw=fc*Math.cos(s.az);
+ $("cd").setAttribute("cx",30*rt);$("cd").setAttribute("cy",-30*fw);
+ $("cl").setAttribute("x2",30*rt);$("cl").setAttribute("y2",-30*fw);
+ $("cd").setAttribute("fill",alt>0?sc:"none");$("cd").setAttribute("stroke",alt>0?"none":"#aaa");
+ const f=fc>0?["S","N","E","W"]:["N","S","W","E"];
+ ["cU","cD","cL","cR"].forEach((id,i)=>{$(id).textContent=f[i];$(id).setAttribute("fill",f[i]==="N"?"#ff8a5c":"#fff")});
+ $("lL").textContent=fc>0?"East":"West";$("lR").textContent=fc>0?"West":"East";
+ $("cf").textContent="You’re facing "+(fc>0?"south":"north");
+
+ // shadow: flattened, mirrored copy of the figure, leaning away from the sun
+ let sh="";
+ if(alt>0.3){
+  const L=Math.min(1/Math.tan(alt*R),4),k=fc*Math.sin(s.az)*L,op=Math.min(1,alt/8)*.42;
+  sh="translate(400 440) matrix(1 0 "+k.toFixed(3)+" -0.17 0 0)";
+  $("shadow").setAttribute("opacity",op);
+ }else $("shadow").setAttribute("opacity",0);
+ $("shadow").setAttribute("transform",sh||"translate(400 440)");
+ $("shadow").setAttribute("x",0);$("shadow").setAttribute("y",0);
+}
+
+function figure(){$("fig").innerHTML=FIG[gender]}
+$("city").innerHTML=CITIES.map((c,i)=>'<option value="'+i+'">'+c.n+"</option>").join("");
+$("city").value=state.ci;
+$("city").onchange=e=>{state.ci=+e.target.value;update()};
+$("dt").onchange=e=>{if(e.target.value){state.date=e.target.value;state.live=false;update()}};
+$("tm").oninput=e=>{state.min=+e.target.value;state.live=false;update()};
+$("now").onclick=()=>{state.live=true;update()};
+$("gen").onclick=()=>{gender=gender==="m"?"f":"m";figure()};
+$("loc").onclick=()=>{
+ if(!navigator.geolocation){$("msg").textContent="Location isn’t available in this browser. Pick a city instead.";return}
+ navigator.geolocation.getCurrentPosition(p=>{
+  CITIES.push({n:"Your location",lat:p.coords.latitude,lng:p.coords.longitude,tz:tzNow});
+  const o=document.createElement("option");o.value=CITIES.length-1;o.textContent="Your location";$("city").appendChild(o);
+  state.ci=CITIES.length-1;$("city").value=state.ci;update();
+ },()=>{$("msg").textContent="Couldn’t get your location. Pick a city from the list instead."});
+};
+figure();update();
+setInterval(()=>{if(state.live)update()},15000);
+</script>
+</body>
+</html>
